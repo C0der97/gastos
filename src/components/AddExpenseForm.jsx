@@ -3,6 +3,8 @@ import useExpenseStore from '../store/useExpenseStore';
 import { format } from 'date-fns';
 import { PlusCircle, Camera, X } from 'lucide-react';
 import { saveImage } from '../utils/storage';
+import { NumericFormat } from 'react-number-format';
+import { numeroALetras } from 'numero-a-letras';
 
 const AddExpenseForm = () => {
     const addExpense = useExpenseStore((state) => state.addExpense);
@@ -53,15 +55,27 @@ const AddExpenseForm = () => {
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl shadow-md mb-6 border border-gray-100">
             <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">Valor</label>
-                <input
-                    type="number"
+                <NumericFormat
                     value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    placeholder="0"
+                    onValueChange={(values) => setAmount(values.value)}
+                    thousandSeparator="."
+                    decimalSeparator=","
+                    prefix="$ "
+                    placeholder="$ 0"
                     className="w-full text-3xl font-bold p-3 border-b-2 border-gray-200 focus:border-blue-500 outline-none transition-colors placeholder-gray-300"
                     inputMode="decimal"
                     required
                 />
+                {amount && (
+                    <p className="text-gray-500 text-sm mt-1 uppercase font-medium">
+                        {numeroALetras(parseFloat(amount), {
+                            plural: 'PESOS',
+                            singular: 'PESO',
+                            centPlural: 'CENTAVOS',
+                            centSingular: 'CENTAVO'
+                        })}
+                    </p>
+                )}
             </div>
 
             <div className="mb-4">

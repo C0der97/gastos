@@ -18,8 +18,10 @@
     "firebase": "^12.8.0",
     "idb-keyval": "^6.2.2",
     "lucide-react": "^0.562.0",
+    "numero-a-letras": "^1.0.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-number-format": "^5.4.4",
     "tailwind-merge": "^3.4.0",
     "zustand": "^5.0.10"
   },
