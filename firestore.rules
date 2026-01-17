@@ -1,0 +1,40 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Funcióne auxiliar para validar que un gasto tenga los campos correctos
+    function isValidExpense() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['amount', 'description', 'date'])
+             && data.amount is number
+             && data.amount > 0
+             && data.description is string
+             && data.description.size() > 0
+             && data.date is string;
+    }
+
+    // Reglas para la colección 'expenses'
+    match /expenses/{expenseId} {
+      // Cualquiera puede leer (ya que no hay login)
+      allow read: if true;
+      
+      // Solo permitir crear/editar si los datos son válidos
+      allow create, update: if isValidExpense();
+      
+      // Permitir borrar
+      allow delete: if true;
+    }
+
+    // Reglas para la colección 'receipts' (imágenes)
+    match /receipts/{receiptId} {
+      allow read: if true;
+      
+      // Solo permitir si tiene el campo 'image' y es texto (Base64)
+      allow create: if request.resource.data.keys().hasAll(['image']) 
+                    && request.resource.data.image is string;
+      
+      allow delete: if true;
+    }
+  }
+}
