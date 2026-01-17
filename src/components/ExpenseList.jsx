@@ -1,11 +1,43 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import useExpenseStore from '../store/useExpenseStore';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Image as ImageIcon, X } from 'lucide-react';
+import { getImage } from '../utils/storage';
+
+const ImageModal = ({ imageId, onClose }) => {
+    const [imageUrl, setImageUrl] = useState(null);
+
+    useEffect(() => {
+        let mounted = true;
+        getImage(imageId).then((url) => {
+            if (mounted && url) setImageUrl(url);
+        });
+        return () => {
+            mounted = false;
+        };
+    }, [imageId]);
+
+    if (!imageUrl) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={onClose}>
+            <div className="relative max-w-full max-h-full">
+                <button
+                    onClick={onClose}
+                    className="absolute -top-10 right-0 text-white p-2"
+                >
+                    <X size={30} />
+                </button>
+                <img src={imageUrl} alt="Recibo" className="max-w-full max-h-[80vh] rounded-lg shadow-2xl" />
+            </div>
+        </div>
+    );
+};
 
 const ExpenseList = () => {
     const { expenses, removeExpense } = useExpenseStore();
+    const [selectedImageId, setSelectedImageId] = useState(null);
 
     // Sort by date desc
     const sortedExpenses = [...expenses].sort((a, b) =>
@@ -44,13 +76,22 @@ const ExpenseList = () => {
                                             {format(parseISO(expense.date), 'dd MMM', { locale: es })}
                                         </span>
                                     </div>
-                                    <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-3">
+                                        {expense.imageId && (
+                                            <button
+                                                onClick={() => setSelectedImageId(expense.imageId)}
+                                                className="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
+                                                aria-label="Ver recibo"
+                                            >
+                                                <ImageIcon size={20} />
+                                            </button>
+                                        )}
                                         <span className="font-bold text-gray-900 text-lg">
                                             ${expense.amount.toLocaleString('es-CO')}
                                         </span>
                                         <button
                                             onClick={() => removeExpense(expense.id)}
-                                            className="text-red-400 hover:text-red-600 p-2 rounded-full hover:bg-red-50 transition-colors"
+                                            className="text-red-400 hover:text-red-600 p-1.5 rounded-full hover:bg-red-50 transition-colors"
                                             aria-label="Eliminar"
                                         >
                                             <Trash2 size={20} />
@@ -67,6 +108,10 @@ const ExpenseList = () => {
                 <div className="text-center py-10 text-gray-400">
                     <p>No hay gastos registrados aún.</p>
                 </div>
+            )}
+
+            {selectedImageId && (
+                <ImageModal imageId={selectedImageId} onClose={() => setSelectedImageId(null)} />
             )}
         </div>
     );

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import useExpenseStore from '../store/useExpenseStore';
 import { format } from 'date-fns';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Camera, X } from 'lucide-react';
+import { saveImage } from '../utils/storage';
 
 const AddExpenseForm = () => {
     const addExpense = useExpenseStore((state) => state.addExpense);
@@ -9,21 +10,43 @@ const AddExpenseForm = () => {
     const [amount, setAmount] = useState('');
     const [description, setDescription] = useState('');
     const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+    const [imageFile, setImageFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
 
-    const handleSubmit = (e) => {
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setImageFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
+
+    const clearImage = () => {
+        setImageFile(null);
+        setPreviewUrl(null);
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!amount || !description) return;
+
+        let imageId = null;
+        if (imageFile) {
+            imageId = await saveImage(imageFile);
+        }
 
         addExpense({
             amount: parseFloat(amount),
             description,
             date, // store as YYYY-MM-DD string
+            imageId,
         });
 
-        // Reset form (keep date as today or last used? usually today is better)
+        // Reset form
         setAmount('');
         setDescription('');
         setDate(format(new Date(), 'yyyy-MM-dd'));
+        clearImage();
     };
 
     return (
@@ -62,6 +85,30 @@ const AddExpenseForm = () => {
                     className="w-full text-lg p-3 bg-gray-50 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
                     required
                 />
+            </div>
+
+            <div className="mb-6">
+                <label className="block text-gray-700 text-sm font-bold mb-2">Foto / Recibo (Opcional)</label>
+                {!previewUrl ? (
+                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <Camera className="w-8 h-8 text-gray-400 mb-2" />
+                            <p className="text-sm text-gray-500">Toca para agregar foto</p>
+                        </div>
+                        <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
+                    </label>
+                ) : (
+                    <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
+                        <img src={previewUrl} alt="Preview" className="w-full h-full object-contain" />
+                        <button
+                            type="button"
+                            onClick={clearImage}
+                            className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full shadow-md hover:bg-red-600 transition-colors"
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
+                )}
             </div>
 
             <button

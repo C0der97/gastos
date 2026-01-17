@@ -1,10 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import useExpenseStore from './store/useExpenseStore';
 import AddExpenseForm from './components/AddExpenseForm';
 import ExpenseList from './components/ExpenseList';
 import SummaryCard from './components/SummaryCard';
 import { Wallet } from 'lucide-react';
 
 function App() {
+  const fetchExpenses = useExpenseStore((state) => state.fetchExpenses);
+
+  useEffect(() => {
+    fetchExpenses();
+  }, [fetchExpenses]);
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 pb-20">
       <div className="max-w-md mx-auto p-4">
