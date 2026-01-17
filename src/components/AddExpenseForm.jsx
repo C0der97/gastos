@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { PlusCircle, Camera, X } from 'lucide-react';
 import { saveImage } from '../utils/storage';
 import { NumericFormat } from 'react-number-format';
-import { numeroALetras } from 'numero-a-letras';
+import { NumerosALetras } from 'numero-a-letras';
 
 const AddExpenseForm = () => {
     const addExpense = useExpenseStore((state) => state.addExpense);
@@ -68,12 +68,7 @@ const AddExpenseForm = () => {
                 />
                 {amount && (
                     <p className="text-gray-500 text-sm mt-1 uppercase font-medium">
-                        {numeroALetras(parseFloat(amount), {
-                            plural: 'PESOS',
-                            singular: 'PESO',
-                            centPlural: 'CENTAVOS',
-                            centSingular: 'CENTAVO'
-                        })}
+                        {NumerosALetras(parseFloat(amount))}
                     </p>
                 )}
             </div>
